@@ -6,39 +6,26 @@ import {
   FlatList,
   Image,
   TouchableOpacity,
-  ActivityIndicator,
   ScrollView,
+  ActivityIndicator,
 } from "react-native";
-import { Picker } from "@react-native-picker/picker";
 import ApiManager from "../api/ApiManager";
 import { APIConstant } from "../api/APIConstants";
 import { Product, Category } from "../model/Product";
-import { RootStackParamList } from "../types/navigation";
-import { StackNavigationProp } from "@react-navigation/stack";
 import { useApp } from "../context/AppContext";
-import { useRoute, RouteProp } from "@react-navigation/native";
-//type ShopRouteParams = StackNavigationProp<RootStackParamList, "Shop">;
+import { StackNavigationProp } from "@react-navigation/stack";
+import { RootStackParamList } from "../types/navigation";
+import { useNavigation } from "@react-navigation/native";
 
-// Define the route params for this screen
-type ShopRouteParams = {
-  Shop: {
-    product?: Product; // product is optional if passed via navigation
-  };
-};
-// Define Props type for the component
-type Props = {
-  product?: Product; // product is optional
-};
-
-const ShopScreen = ({ product }: Props) => {
+const ShopScreen = () => {
   const [categories, setCategories] = useState<Category[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
+  const [deals, setDeals] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [categoryFilter, setCategoryFilter] = useState<string>("");
   const [priceFilter, setPriceFilter] = useState<string>("");
-  const { addToCart, addToWishlist, removeFromCart, removeFromWishlist } =
-    useApp();
-  const route = useRoute<RouteProp<ShopRouteParams, "Shop">>();
+  const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
+  const { addToCart } = useApp();
 
   useEffect(() => {
     fetchCategories();
@@ -52,7 +39,6 @@ const ShopScreen = ({ product }: Props) => {
   const fetchCategories = async () => {
     try {
       const data = await ApiManager.get(APIConstant.CATEGORY);
-      console.log("Categories fetched:", data);
       setCategories(data);
     } catch (error) {
       console.error("Error fetching categories", error);
@@ -64,6 +50,7 @@ const ShopScreen = ({ product }: Props) => {
       setLoading(true);
       const data = await ApiManager.get(APIConstant.PRODUCTS);
       setProducts(data);
+      setDeals(data.filter((item: Product) => item.price < 50)); // Sample logic for deals
     } catch (error) {
       console.error("Error fetching products", error);
     } finally {
@@ -75,7 +62,6 @@ const ShopScreen = ({ product }: Props) => {
     const filters: Record<string, any> = {};
     if (categoryFilter) filters.categoryId = categoryFilter;
 
-    // Price filter isn't supported directly, so we'll filter client-side
     try {
       setLoading(true);
       const endpoint = APIConstant.PRODUCT_FILTER(filters);
@@ -101,43 +87,82 @@ const ShopScreen = ({ product }: Props) => {
     }
   };
 
-  const renderProduct = ({ item }: { item: Product }) => (
-    <View style={styles.card}>
-      <Image source={{ uri: item.images[0] }} style={styles.productImage} />
-      <Text style={styles.productTitle}>{item.title}</Text>
-      <Text style={styles.productPrice}>${item.price}</Text>
-      <TouchableOpacity onPress={() => addToCart(item)}>
-        <Text style={styles.addToCart}>Add to Cart</Text>
+  // Navigate to Product Details screen
+  const handleProductPress = (productId: number) => {
+    navigation.navigate("Shop", {
+      screen: "ProductDetails",
+      params: { productId: productId }, // Pass the productId here
+    }); // Passing productId to ProductDetails screen
+  };
+
+  const renderProductCard = ({ item }: { item: Product }) => (
+    <View style={styles.productCard}>
+      <TouchableOpacity onPress={() => handleProductPress(item.id)}>
+        <Image source={{ uri: item.images[0] }} style={styles.image} />
+        <Text numberOfLines={1} style={styles.title}>
+          {item.title}
+        </Text>
+        <Text style={styles.price}>${item.price}</Text>
       </TouchableOpacity>
+      <TouchableOpacity style={styles.cartBtn} onPress={() => addToCart(item)}>
+        <Text style={styles.cartBtnText}>Add to Cart</Text>
+      </TouchableOpacity>
+    </View>
+  );
+
+  const renderDealCard = ({ item }: { item: Product }) => (
+    <View style={styles.dealCard}>
+      <Image source={{ uri: item.images[0] }} style={styles.dealImage} />
+      <Text numberOfLines={1} style={styles.dealTitle}>
+        {item.title}
+      </Text>
+      <Text style={styles.dealPrice}>${item.price}</Text>
     </View>
   );
 
   return (
     <ScrollView style={styles.container}>
-      <Text style={styles.title}>Shop</Text>
+      {/* <Text style={styles.header}>Shop</Text> */}
 
-      <View style={styles.filterBox}>
-        <Text style={styles.sectionTitle}>Filters</Text>
+      {/* Filters */}
+      <View style={styles.filters}>
+        <Text style={styles.filterLabel}>Category</Text>
+        {/* Horizontal Category Pills */}
+        <FlatList
+          data={categories}
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          keyExtractor={(item) => item.id.toString()}
+          contentContainerStyle={{ paddingVertical: 8 }}
+          renderItem={({ item }) => {
+            const isSelected = categoryFilter === String(item.id);
+            return (
+              <TouchableOpacity
+                onPress={() =>
+                  setCategoryFilter((prev) =>
+                    prev === String(item.id) ? "" : String(item.id)
+                  )
+                }
+                style={[
+                  styles.categoryPill,
+                  isSelected && styles.categoryPillSelected,
+                ]}
+              >
+                <Text
+                  style={[
+                    styles.categoryText,
+                    isSelected && styles.categoryTextSelected,
+                  ]}
+                >
+                  {item.name}
+                </Text>
+              </TouchableOpacity>
+            );
+          }}
+        />
 
-        <Text style={styles.label}>Category</Text>
-        <View style={styles.pickerWrapper}>
-          <Picker
-            selectedValue={categoryFilter}
-            onValueChange={(value) => setCategoryFilter(value)}
-            style={styles.picker}
-          >
-            <Picker.Item label="All Categories" value="" />
-            {categories.map((cat) => (
-              <Picker.Item
-                label={cat.name}
-                value={String(cat.id)} // Ensure it's a string
-                key={cat.id}
-              />
-            ))}
-          </Picker>
-        </View>
-        <Text style={styles.label}>Price Range</Text>
-        <View style={styles.buttonRow}>
+        <Text style={styles.filterLabel}>Price</Text>
+        <View style={styles.priceButtons}>
           {[
             { label: "Under $50", value: "under50" },
             { label: "$50 - $200", value: "50to200" },
@@ -145,59 +170,68 @@ const ShopScreen = ({ product }: Props) => {
           ].map((btn) => (
             <TouchableOpacity
               key={btn.value}
-              onPress={() => setPriceFilter(btn.value)}
               style={[
                 styles.priceButton,
                 priceFilter === btn.value && styles.priceButtonSelected,
               ]}
+              onPress={() => setPriceFilter(btn.value)}
             >
-              <Text style={styles.priceText}>{btn.label}</Text>
+              <Text
+                style={[
+                  styles.priceText,
+                  priceFilter === btn.value && styles.priceTextSelected,
+                ]}
+              >
+                {btn.label}
+              </Text>
             </TouchableOpacity>
           ))}
         </View>
       </View>
 
-      <Text style={styles.sectionTitle}>Deals</Text>
-
+      {/* Products */}
+      <Text style={styles.sectionTitle}>Products</Text>
       {loading ? (
-        <ActivityIndicator size="large" style={{ marginTop: 20 }} />
+        <ActivityIndicator size="large" />
       ) : (
         <FlatList
           data={products}
+          renderItem={renderProductCard}
           keyExtractor={(item) => item.id.toString()}
-          renderItem={renderProduct}
+          numColumns={2}
           scrollEnabled={false}
+          columnWrapperStyle={styles.row}
+          contentContainerStyle={{ paddingBottom: 10 }}
         />
       )}
+
+      {/* Deals */}
+      <Text style={styles.sectionTitle}>Deals</Text>
+      <FlatList
+        data={deals}
+        renderItem={renderDealCard}
+        keyExtractor={(item) => item.id.toString() + "deal"}
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={{ paddingBottom: 20 }}
+      />
     </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 16, backgroundColor: "#f5f5f5" },
-  title: { fontSize: 28, fontWeight: "bold", marginBottom: 12 },
-  sectionTitle: { fontSize: 20, fontWeight: "600", marginBottom: 8 },
-  filterBox: {
+  container: { flex: 1, backgroundColor: "#f9f9f9", padding: 16 },
+  header: { fontSize: 28, fontWeight: "bold", marginBottom: 16 },
+  sectionTitle: { fontSize: 20, fontWeight: "600", marginVertical: 16 },
+  filters: {
     backgroundColor: "#fff",
-    padding: 16,
-    borderRadius: 12,
-    marginBottom: 20,
+    borderRadius: 10,
+    padding: 12,
+    marginBottom: 16,
     elevation: 2,
   },
-  label: { fontSize: 16, marginTop: 10, marginBottom: 4 },
-  pickerWrapper: {
-    borderWidth: 1,
-    borderColor: "#ccc",
-    borderRadius: 8,
-    overflow: "hidden",
-    marginBottom: 12,
-  },
-  picker: { height: 44, width: "100%" },
-  buttonRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginTop: 8,
-  },
+  filterLabel: { fontSize: 16, fontWeight: "500", marginVertical: 8 },
+  priceButtons: { flexDirection: "row", justifyContent: "space-between" },
   priceButton: {
     backgroundColor: "#eee",
     padding: 10,
@@ -209,33 +243,69 @@ const styles = StyleSheet.create({
   priceButtonSelected: {
     backgroundColor: "#007bff",
   },
-  priceText: {
-    color: "#000",
-  },
-  card: {
+  priceText: { color: "#333" },
+  priceTextSelected: { color: "#fff", fontWeight: "bold" },
+  row: { justifyContent: "space-between" },
+  productCard: {
     backgroundColor: "#fff",
+    flex: 1,
     borderRadius: 12,
-    padding: 16,
-    marginVertical: 8,
+    marginBottom: 16,
+    marginHorizontal: 4,
+    padding: 10,
     elevation: 3,
   },
-  productImage: {
-    height: 160,
+  image: {
+    width: "100%",
+    height: 130,
     borderRadius: 8,
-    marginBottom: 10,
+    marginBottom: 8,
   },
-  productTitle: {
-    fontSize: 16,
-    fontWeight: "600",
-  },
-  productPrice: {
-    fontSize: 16,
-    color: "#888",
-    marginVertical: 4,
-  },
-  addToCart: {
-    color: "#007bff",
+  title: { fontSize: 14, fontWeight: "500" },
+  price: { fontSize: 14, color: "#666", marginTop: 4 },
+  cartBtn: {
+    backgroundColor: "#2f56f7",
+    paddingVertical: 6,
     marginTop: 8,
+    borderRadius: 6,
+    alignItems: "center",
+  },
+  cartBtnText: { color: "#fff", fontWeight: "600" },
+
+  dealCard: {
+    width: 140,
+    backgroundColor: "#fff",
+    borderRadius: 12,
+    marginRight: 12,
+    padding: 10,
+    elevation: 3,
+  },
+  dealImage: {
+    width: "100%",
+    height: 100,
+    borderRadius: 8,
+  },
+  dealTitle: { fontSize: 13, fontWeight: "500", marginTop: 6 },
+  dealPrice: { fontSize: 13, color: "#e53935", fontWeight: "bold" },
+
+  // Styles for Category Pills
+  categoryPill: {
+    backgroundColor: "#eee",
+    borderRadius: 20,
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    marginRight: 8,
+  },
+  categoryPillSelected: {
+    backgroundColor: "#2f56f7",
+  },
+  categoryText: {
+    fontSize: 14,
+    color: "#333",
+  },
+  categoryTextSelected: {
+    color: "#fff",
+    fontWeight: "bold",
   },
 });
 

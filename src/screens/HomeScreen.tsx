@@ -1,121 +1,3 @@
-// // src/screens/HomeScreen.tsx
-// import React from "react";
-// import { View, Text, Button, StyleSheet, TouchableOpacity } from "react-native";
-// import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-// import { RootStackParamList } from "../types/navigation";
-// import { RouteProp } from "@react-navigation/native";
-
-// type HomeScreenNavigationProp = NativeStackNavigationProp<
-//   RootStackParamList,
-//   "Home"
-// >;
-// type HomeScreenRouteProp = RouteProp<RootStackParamList, "Home">;
-
-// type Props = {
-//   navigation: HomeScreenNavigationProp;
-//   route: HomeScreenRouteProp;
-// };
-
-// const HomeScreen: React.FC<Props> = ({ navigation }) => {
-//   console.log("HomeScreen rendered");
-//   return (
-//     <View style={styles.container}>
-//       <Text>Home Screen</Text>
-//       <Text>Home Screen</Text>
-//       <TouchableOpacity
-//         onPress={() => {
-//           console.log("Navigating to Details");
-//           navigation.navigate("Details");
-//         }}
-//         style={styles.button}
-//       >
-//         <Text style={styles.buttonText}>Go to Details</Text>
-//       </TouchableOpacity>
-//     </View>
-//   );
-// };
-
-// export default HomeScreen;
-
-// const styles = StyleSheet.create({
-//   container: { flex: 1, justifyContent: "center", alignItems: "center" },
-//   button: {
-//     paddingVertical: 12,
-//     paddingHorizontal: 24,
-//     backgroundColor: "#007bff",
-//     borderRadius: 8,
-//   },
-//   buttonText: {
-//     color: "#fff",
-//     fontSize: 16,
-//   },
-// });
-// src/screens/HomeScreen.tsx
-// import React, { useState, useEffect } from "react";
-// import { View, Text, FlatList, StyleSheet } from "react-native";
-// import ApiManager from "../api/ApiManager"; // Import ApiManager
-// import { APIConstant } from "../api/APIConstants"; // Import API constants
-// import { Product } from "../model/Product"; // Import the Product model
-
-// const HomeScreen = () => {
-//   const [products, setProducts] = useState<Product[]>([]);
-
-//   useEffect(() => {
-//     const fetchProducts = async () => {
-//       try {
-//         // Fetch the raw data from API
-//         const response = await ApiManager.get(APIConstant.PRODUCTS);
-
-//         // Directly use the decoded object response
-//         setProducts(response); // Assuming the API returns an array of products
-//       } catch (error) {
-//         console.error("Error fetching products:", error);
-//       }
-//     };
-
-//     fetchProducts();
-//   }, []);
-
-//   const renderItem = ({ item }: { item: Product }) => (
-//     <View style={styles.productCard}>
-//       <Text>{item.title}</Text>
-//       <Text>${item.price}</Text>
-//       <Text>{item.category.name}</Text>
-//       <Text>{item.description}</Text>
-//     </View>
-//   );
-
-//   return (
-//     <View style={styles.container}>
-//       <Text style={styles.header}>Product List</Text>
-//       <FlatList
-//         data={products}
-//         renderItem={renderItem}
-//         keyExtractor={(item) => item.id.toString()}
-//       />
-//     </View>
-//   );
-// };
-
-// const styles = StyleSheet.create({
-//   container: {
-//     flex: 1,
-//     padding: 16,
-//   },
-//   header: {
-//     fontSize: 24,
-//     fontWeight: "bold",
-//     marginBottom: 16,
-//   },
-//   productCard: {
-//     marginBottom: 10,
-//     padding: 10,
-//     borderWidth: 1,
-//     borderRadius: 8,
-//   },
-// });
-
-// export default HomeScreen;
 // src/screens/HomeScreen.tsx
 import React, { useState, useEffect } from "react";
 import {
@@ -133,13 +15,21 @@ import { APIConstant } from "../api/APIConstants";
 import { Product } from "../model/Product";
 import Icon from "react-native-vector-icons/MaterialIcons"; // For icons like cart, search
 import { Category } from "../model/Category";
+import {
+  CompositeNavigationProp,
+  useNavigation,
+} from "@react-navigation/native";
+import { RootStackParamList, ShopStackParamList } from "../types/navigation";
+import { StackNavigationProp } from "@react-navigation/stack";
+import { BottomTabNavigationProp } from "@react-navigation/bottom-tabs";
 
 const HomeScreen = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-
+  const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
+  // const navigation = useNavigation<ShopNavProp>();
   useEffect(() => {
     const fetchProducts = async () => {
       try {
@@ -182,9 +72,19 @@ const HomeScreen = () => {
       </Text>
     </TouchableOpacity>
   );
+  // Navigate to Product Details screen
+  const handleProductPress = (productId: number) => {
+    navigation.navigate("Shop", {
+      screen: "ProductDetails",
+      params: { productId: productId }, // Pass the productId here
+    }); // Passing productId to ProductDetails screen
+  };
 
   const renderProduct = ({ item }: { item: Product }) => (
-    <TouchableOpacity style={styles.productCard}>
+    <TouchableOpacity
+      style={styles.productCard}
+      onPress={() => handleProductPress(item.id)}
+    >
       <Image source={{ uri: item.images[0] }} style={styles.productImage} />
       <Text style={styles.productTitle}>{item.title}</Text>
       <Text style={styles.productPrice}>${item.price}</Text>

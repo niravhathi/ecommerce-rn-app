@@ -9,7 +9,7 @@ import {
   ScrollView,
 } from "react-native";
 import { useApp } from "../context/AppContext";
-import { Product } from "../model/Product";
+import { CartItem, Product } from "../model/Product";
 
 // interface Product {
 //   id: string;
@@ -120,10 +120,9 @@ const mockPopular: Product[] = [
 export default function CartScreen() {
   const { cartItems } = useApp();
   console.log("Cart Items:", cartItems);
-  //const [cartItems] = useState<Product[]>(mockCart);
   const [wishlistItems] = useState<Product[]>(mockWishlist);
 
-  const renderProduct = (item: Product, isCart = false) => (
+  const renderProduct = (item: CartItem, isCart = false) => (
     <View key={item.id} style={styles.productRow}>
       <Image source={{ uri: item.images[0] }} style={styles.productImage} />
       <View style={styles.productInfo}>
@@ -134,7 +133,7 @@ export default function CartScreen() {
             <TouchableOpacity>
               <Text>➖</Text>
             </TouchableOpacity>
-            <Text style={styles.qty}>1</Text>
+            <Text style={styles.qty}>{item.quantity}</Text>
             <TouchableOpacity>
               <Text>➕</Text>
             </TouchableOpacity>
@@ -177,7 +176,6 @@ export default function CartScreen() {
         Cart <Text style={styles.cartCount}>{cartItems.length}</Text>
       </Text>
       {renderHeader()}
-
       {cartItems.length > 0 ? (
         <>
           {cartItems.map((item) => renderProduct(item, true))}
@@ -195,7 +193,7 @@ export default function CartScreen() {
       ) : (
         <>{renderEmptyCartIcon()}</>
       )}
-      <Text style={styles.sectionTitle}>Most Popular</Text>
+      <Text style={styles.sectionTitle}>Most Popular</Text>dgg
       <FlatList
         data={mockPopular}
         horizontal
@@ -211,9 +209,7 @@ export default function CartScreen() {
         )}
         showsHorizontalScrollIndicator={false}
       />
-
       {/* <Text style={styles.total}>Total $0.00</Text> */}
-
       <TouchableOpacity style={styles.checkoutBtn}>
         <Text style={styles.checkoutText}>Checkout</Text>
       </TouchableOpacity>

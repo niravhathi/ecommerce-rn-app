@@ -1,5 +1,5 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { Product } from "../model/Product";
+import { CartItem, Product } from "../model/Product";
 
 const CART_KEY = "@cart_items";
 const WISHLIST_KEY = "@wishlist_items";
@@ -8,7 +8,7 @@ export const saveCartItems = async (items: Product[]) => {
   await AsyncStorage.setItem(CART_KEY, JSON.stringify(items));
 };
 
-export const getCartItems = async (): Promise<Product[]> => {
+export const getCartItems = async (): Promise<CartItem[]> => {
   const result = await AsyncStorage.getItem(CART_KEY);
   return result ? JSON.parse(result) : [];
 };

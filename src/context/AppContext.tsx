@@ -7,7 +7,7 @@ import React, {
   useEffect,
   ReactNode,
 } from "react";
-import { Product } from "../model/Product";
+import { Product, CartItem } from "../model/Product";
 import {
   getCartItems,
   saveCartItems,
@@ -37,7 +37,7 @@ interface AppProviderProps {
 }
 
 export const AppProvider = ({ children }: AppProviderProps) => {
-  const [cartItems, setCartItems] = useState<Product[]>([]);
+  const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [wishlistItems, setWishlistItems] = useState<Product[]>([]);
 
   useEffect(() => {
@@ -49,9 +49,20 @@ export const AppProvider = ({ children }: AppProviderProps) => {
   }, []);
 
   const addToCart = (product: Product) => {
-    const updated = [...cartItems, product];
-    setCartItems(updated);
-    saveCartItems(updated);
+    const existing = cartItems.find((item) => item.id === product.id);
+
+    let updatedCart;
+    if (existing) {
+      updatedCart = cartItems.map((item) =>
+        item.id === product.id
+          ? { ...item, quantity: (item.quantity || 1) + 1 }
+          : item
+      );
+    } else {
+      updatedCart = [...cartItems, { ...product, quantity: 1 }];
+    }
+    setCartItems(updatedCart);
+    saveCartItems(updatedCart);
   };
 
   const addToWishlist = (product: Product) => {

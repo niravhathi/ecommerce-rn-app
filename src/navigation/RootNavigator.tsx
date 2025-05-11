@@ -1,14 +1,12 @@
 import React from "react";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import { NavigationContainer } from "@react-navigation/native";
 import Ionicons from "react-native-vector-icons/Ionicons";
 
 // Import screens
 import HomeScreen from "../screens/HomeScreen";
-import ShopScreen from "../screens/ShopScreen";
 import CartScreen from "../screens/CartScreen";
-import AccountScreen from "../screens/AccountScreen";
 import AccountStack from "./AccountStack";
+import ShopStack from "./ShopStack";
 
 const Tab = createBottomTabNavigator();
 
@@ -40,7 +38,7 @@ const RootNavigator = () => {
       <Tab.Screen name="Home" component={HomeScreen} />
       <Tab.Screen
         name="Shop"
-        component={ShopScreen}
+        component={ShopStack}
         options={({ navigation }) => ({
           headerLeft: () => (
             <Ionicons
@@ -50,6 +48,7 @@ const RootNavigator = () => {
               onPress={() => navigation.navigate("Filter")}
             />
           ),
+          headerShown: false,
         })}
       />
       <Tab.Screen name="Cart" component={CartScreen} />
@@ -59,6 +58,7 @@ const RootNavigator = () => {
         options={{ headerShown: false }}
       />
     </Tab.Navigator>
+
     //  </NavigationContainer>
   );
 };

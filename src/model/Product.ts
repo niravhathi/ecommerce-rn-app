@@ -20,3 +20,6 @@ export interface Product {
   creationAt: string;
   updatedAt: string;
 }
+export interface CartItem extends Product {
+  quantity: number;
+}
