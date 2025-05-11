@@ -21,5 +21,5 @@ export interface Product {
   updatedAt: string;
 }
 export interface CartItem extends Product {
-  quantity: number;
+  quantity?: number;
 }

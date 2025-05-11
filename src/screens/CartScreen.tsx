@@ -11,17 +11,7 @@ import {
 import { useApp } from "../context/AppContext";
 import { CartItem, Product } from "../model/Product";
 
-// interface Product {
-//   id: string;
-//   title: string;
-//   price: number;
-//   image: string;
-//   size?: string;
-//   tags?: string[];
-// }
-
-//const mockCart: Product[] = []; // simulate empty or filled
-const mockWishlist: Product[] = [
+const mockWishlist: CartItem[] = [
   {
     id: 4,
     title: "Classic Grey Hooded Sweatshirt",
@@ -69,7 +59,7 @@ const mockWishlist: Product[] = [
     updatedAt: "2025-05-04T08:28:47.000Z",
   },
 ];
-const mockPopular: Product[] = [
+const mockPopular: CartItem[] = [
   {
     id: 6,
     title: "Classic Comfort Fit Joggers",
@@ -118,9 +108,9 @@ const mockPopular: Product[] = [
 ];
 
 export default function CartScreen() {
-  const { cartItems } = useApp();
+  const { cartItems, increaseQuantity, decreaseQuantity } = useApp();
   console.log("Cart Items:", cartItems);
-  const [wishlistItems] = useState<Product[]>(mockWishlist);
+  const [wishlistItems] = useState<CartItem[]>(mockWishlist);
 
   const renderProduct = (item: CartItem, isCart = false) => (
     <View key={item.id} style={styles.productRow}>
@@ -130,11 +120,11 @@ export default function CartScreen() {
         <Text>${item.price.toFixed(2)}</Text>
         {isCart ? (
           <View style={styles.qtyRow}>
-            <TouchableOpacity>
+            <TouchableOpacity onPress={() => decreaseQuantity(item.id)}>
               <Text>➖</Text>
             </TouchableOpacity>
             <Text style={styles.qty}>{item.quantity}</Text>
-            <TouchableOpacity>
+            <TouchableOpacity onPress={() => increaseQuantity(item.id)}>
               <Text>➕</Text>
             </TouchableOpacity>
           </View>
@@ -180,7 +170,10 @@ export default function CartScreen() {
         <>
           {cartItems.map((item) => renderProduct(item, true))}
           <Text style={styles.total}>
-            Total ${cartItems.reduce((sum, p) => sum + p.price, 0).toFixed(2)}
+            Total $
+            {cartItems
+              .reduce((sum, p) => sum + p.price * (p.quantity ?? 1), 0)
+              .toFixed(2)}
           </Text>
         </>
       ) : wishlistItems.length > 0 ? (
@@ -193,7 +186,7 @@ export default function CartScreen() {
       ) : (
         <>{renderEmptyCartIcon()}</>
       )}
-      <Text style={styles.sectionTitle}>Most Popular</Text>dgg
+      <Text style={styles.sectionTitle}>Most Popular</Text>
       <FlatList
         data={mockPopular}
         horizontal

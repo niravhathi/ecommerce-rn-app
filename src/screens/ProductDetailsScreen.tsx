@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -26,20 +26,11 @@ const ProductDetailsScreen = () => {
   // Get product id from route params
   const route = useRoute<ProductDetailsRouteProp>();
   const productId = route.params?.productId;
-  console.log("Product ID from route:", route.params);
 
   // Get the addToCart function from context
-  const { addToCart } = useApp();
+  const { addToCart, addRecentlyViewed } = useApp();
 
-  useEffect(() => {
-    console.log("Fetching product details for ID:", productId);
-    if (productId) {
-      fetchProductDetails(productId);
-    }
-  }, [productId]);
-
-  const fetchProductDetails = async (id: number) => {
-    console.log("Fetching product details for ID:", id);
+  const fetchProductDetails = useCallback(async (id: number) => {
     try {
       const data = await ApiManager.get(APIConstant.PRODUCT_BY_ID(id));
       setProduct(data);
@@ -48,7 +39,19 @@ const ProductDetailsScreen = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    if (productId) {
+      fetchProductDetails(productId);
+    }
+  }, [productId, fetchProductDetails]);
+
+  useEffect(() => {
+    if (product) {
+      addRecentlyViewed(product);
+    }
+  }, [product]);
 
   if (loading) {
     return <ActivityIndicator size="large" style={styles.loader} />;
@@ -66,7 +69,6 @@ const ProductDetailsScreen = () => {
   const handleAddToCart = () => {
     if (product) {
       addToCart(product); // Adding the product to cart via context API
-      console.log(`${product.title} added to cart`);
     }
   };
 

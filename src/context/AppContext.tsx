@@ -16,16 +16,20 @@ import {
 } from "../utils/storage";
 
 interface AppContextType {
-  cartItems: Product[];
-  wishlistItems: Product[];
-  addToCart: (product: Product) => void;
-  addToWishlist: (product: Product) => void;
+  cartItems: CartItem[];
+  wishlistItems: CartItem[];
+  addToCart: (product: CartItem) => void;
+  addToWishlist: (product: CartItem) => void;
   removeFromCart: (productId: number) => void;
   removeFromWishlist: (productId: number) => void;
+  increaseQuantity: (productId: number) => void;
+  decreaseQuantity: (productId: number) => void;
+  addRecentlyViewed: (product: CartItem) => void;
+  recentlyViewed: CartItem[];
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
-
+const [recentlyViewed, setRecentlyViewed] = useState<CartItem[]>([]);
 export const useApp = () => {
   const context = useContext(AppContext);
   if (!context) throw new Error("useApp must be used within an AppProvider");
@@ -39,6 +43,7 @@ interface AppProviderProps {
 export const AppProvider = ({ children }: AppProviderProps) => {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [wishlistItems, setWishlistItems] = useState<Product[]>([]);
+  const [recentlyViewed, setRecentlyViewed] = useState<CartItem[]>([]);
 
   useEffect(() => {
     const loadData = async () => {
@@ -83,6 +88,37 @@ export const AppProvider = ({ children }: AppProviderProps) => {
     saveWishlistItems(updated);
   };
 
+  const increaseQuantity = (productId: number) => {
+    const updated = cartItems.map((item) =>
+      item.id === productId
+        ? { ...item, quantity: (item.quantity || 1) + 1 }
+        : item
+    );
+    setCartItems(updated);
+    saveCartItems(updated);
+  };
+
+  const decreaseQuantity = (productId: number) => {
+    const updated = cartItems
+      .map((item) =>
+        item.id === productId
+          ? { ...item, quantity: (item.quantity || 1) - 1 }
+          : item
+      )
+      .filter((item) => (item.quantity ?? 0) > 0); // Remove if quantity is 0
+
+    setCartItems(updated);
+    saveCartItems(updated);
+  };
+
+  const addRecentlyViewed = (product: Product) => {
+    setRecentlyViewed((prev) => {
+      const filtered = prev.filter((p) => p.id !== product.id);
+      const updated = [product, ...filtered].slice(0, 5);
+      console.log("Updated recently viewed:", updated);
+      return updated;
+    });
+  };
   return (
     <AppContext.Provider
       value={{
@@ -92,6 +128,10 @@ export const AppProvider = ({ children }: AppProviderProps) => {
         addToWishlist,
         removeFromCart,
         removeFromWishlist,
+        increaseQuantity,
+        decreaseQuantity,
+        addRecentlyViewed,
+        recentlyViewed,
       }}
     >
       {children}

@@ -6,9 +6,9 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import { AppProvider } from "./src/context/AppContext";
 import RootStack from "./src/navigation/RootStack";
 const App = () => {
-  useEffect(() => {
-    ApiManager.init(); // Initialize the API manager (no need to pass URL anymore)
-  }, []);
+  // useEffect(() => {
+  //   ApiManager?.init(); // Optional chaining does the same as your `if` check
+  // }, []);
 
   return (
     <AppProvider>

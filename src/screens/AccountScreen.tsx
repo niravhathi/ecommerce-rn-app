@@ -5,6 +5,7 @@ import {
   ScrollView,
   StyleSheet,
   TouchableOpacity,
+  Image,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Ionicons from "react-native-vector-icons/Ionicons";
@@ -22,6 +23,7 @@ import Icon from "react-native-vector-icons/MaterialIcons";
 import { useEffect, useState } from "react";
 import { getUser } from "../utils/UserStorage";
 import { User } from "../model/User";
+import { useApp } from "../context/AppContext";
 
 type AccountNavProp = CompositeNavigationProp<
   BottomTabNavigationProp<RootStackParamList, "Account">,
@@ -31,7 +33,8 @@ type AccountNavProp = CompositeNavigationProp<
 const AccountScreen = () => {
   const navigation = useNavigation<AccountNavProp>();
   const [user, setUser] = useState<User | null>(null);
-
+  const { recentlyViewed } = useApp();
+  console.log("Recently Viewed Items:", recentlyViewed);
   useEffect(() => {
     const loadUser = async () => {
       const storedUser = await getUser();
@@ -95,8 +98,13 @@ const AccountScreen = () => {
           showsHorizontalScrollIndicator={false}
           style={styles.recentlyViewed}
         >
-          {[...Array(5)].map((_, index) => (
-            <View key={index} style={styles.viewedItem} />
+          {recentlyViewed.map((product) => (
+            <View key={product.id} style={styles.viewedItem}>
+              <Image
+                source={{ uri: product.images[0] }}
+                style={styles.viewedItem}
+              />
+            </View>
           ))}
         </ScrollView>
 

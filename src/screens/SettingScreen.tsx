@@ -29,8 +29,6 @@ const SettingScreen = () => {
   };
   return (
     <ScrollView style={styles.container}>
-      <Text style={styles.heading}>Settings</Text>
-
       <Text style={styles.section}>Personal</Text>
       <Option label="Profile" />
       <Option label="Shipping Address" />
@@ -51,8 +49,6 @@ const SettingScreen = () => {
       <TouchableOpacity style={styles.delete}>
         <Text style={styles.deleteText}>Delete My Account</Text>
       </TouchableOpacity>
-
-      <Text style={styles.footer}>Slada{"\n"}Version 1.0 April, 2020</Text>
     </ScrollView>
   );
 };
