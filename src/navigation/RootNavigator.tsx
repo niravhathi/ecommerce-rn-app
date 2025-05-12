@@ -45,7 +45,11 @@ const RootNavigator = () => {
         component={ShopStack}
         options={{ headerShown: false }}
       />
-      <Tab.Screen name="Cart" component={CartScreen} />
+      <Tab.Screen
+        name="Cart"
+        component={CartScreen}
+        options={{ headerShown: false }}
+      />
       <Tab.Screen
         name="Account"
         component={AccountStack}

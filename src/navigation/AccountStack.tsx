@@ -6,6 +6,8 @@ import AccountScreen from "../screens/AccountScreen";
 import SettingsScreen from "../screens/SettingScreen";
 import { AccountStackParamList } from "../types/navigation";
 import ProductDetailsScreen from "../screens/ProductDetailsScreen";
+import PaymentMethodScreen from "../screens/payment/PaymentMethodScreen";
+import AboutScreen from "../screens/AboutScreen";
 
 const Stack = createStackNavigator<AccountStackParamList>();
 
@@ -29,6 +31,19 @@ const AccountStack = () => {
           title: "Product Details",
           headerBackButtonDisplayMode: "minimal",
         }}
+      />
+      <Stack.Screen
+        name="PaymentMethod"
+        component={PaymentMethodScreen}
+        options={{
+          title: "Payment Method",
+          headerBackButtonDisplayMode: "minimal",
+        }}
+      />
+      <Stack.Screen
+        name="About"
+        component={AboutScreen}
+        options={{ title: "About", headerBackButtonDisplayMode: "minimal" }}
       />
     </Stack.Navigator>
   );

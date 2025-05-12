@@ -14,7 +14,7 @@ const ShopStack = () => {
       <Stack.Screen
         name="ShopMain"
         component={ShopScreen}
-        options={{ title: "Shop" }}
+        options={{ title: "Shop", headerShown: false }} // Show header for ShopMain
       />
       <Stack.Screen
         name="ProductDetails"

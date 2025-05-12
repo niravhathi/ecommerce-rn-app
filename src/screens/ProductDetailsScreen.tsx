@@ -7,6 +7,7 @@ import {
   ScrollView,
   TouchableOpacity,
   ActivityIndicator,
+  Dimensions,
 } from "react-native";
 import { RouteProp, useRoute } from "@react-navigation/native";
 import ApiManager from "../api/ApiManager";
@@ -18,7 +19,7 @@ type ProductDetailsRouteProp = RouteProp<
   { ProductDetails: { productId: number } },
   "ProductDetails"
 >;
-
+const screenDimension = Dimensions.get("window");
 const ProductDetailsScreen = () => {
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
@@ -130,11 +131,10 @@ const styles = StyleSheet.create({
     height: 250,
   },
   productImage: {
-    width: 300,
+    width: screenDimension.width - 32,
     height: 250,
     resizeMode: "cover",
     borderRadius: 10,
-    marginRight: 10,
   },
   productInfo: {
     marginTop: 20,
@@ -174,6 +174,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     alignItems: "center",
     marginTop: 20,
+    marginBottom: 50,
   },
   addToCartText: {
     color: "#fff",

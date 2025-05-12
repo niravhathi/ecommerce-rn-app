@@ -23,6 +23,8 @@ export type AccountStackParamList = {
   AccountMain: undefined;
   Settings: undefined;
   ProductDetails: { productId: number };
+  PaymentMethod: undefined;
+  About: undefined;
 };
 
 // navigation/types.ts
