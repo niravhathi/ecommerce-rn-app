@@ -26,7 +26,11 @@ export default function RootStack() {
       <Stack.Screen
         name="Register"
         component={RegistrationScreen}
-        options={{ headerShown: true, title: "" }}
+        options={{
+          headerShown: true,
+          title: "Register",
+          headerBackButtonDisplayMode: "minimal",
+        }}
       />
       <Stack.Screen
         name="MainTabs"

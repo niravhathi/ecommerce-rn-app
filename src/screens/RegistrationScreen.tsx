@@ -3,39 +3,41 @@ import {
   View,
   Text,
   TextInput,
-  StyleSheet,
-  Alert,
   TouchableOpacity,
-  Platform,
+  StyleSheet,
   Modal,
-  ScrollView,
+  Platform,
   KeyboardAvoidingView,
   TouchableWithoutFeedback,
   Keyboard,
+  ScrollView,
 } from "react-native";
 import CheckBox from "@react-native-community/checkbox";
-import DatePicker from "@react-native-community/datetimepicker"; // Importing DatePicker to create custom DatePicker UI
-import axios from "axios"; // Import axios for API requests
-import { APIConstant } from "../api/APIConstants"; // Import API constants
-import { User } from "../model/User"; // adjust path if needed
+import DateTimePicker from "@react-native-community/datetimepicker";
 
-export default function RegistrationScreen({ navigation }: any) {
+const RegistrationScreen = () => {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [gender, setGender] = useState("");
-  const [showGenderModal, setShowGenderModal] = useState(false);
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [address, setAddress] = useState("");
-  const [dob, setDob] = useState(new Date());
-  const [agree, setAgree] = useState(false);
-  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [dob, setDob] = useState<Date | null>(null);
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [agree, setAgree] = useState(false);
 
-  const genderOptions = ["Mr", "Ms"];
+  const [showGenderModal, setShowGenderModal] = useState(false);
+  const [showDatePicker, setShowDatePicker] = useState(false);
 
-  const validateForm = () => {
+  const handleDateChange = (event: any, selectedDate?: Date) => {
+    setShowDatePicker(false);
+    if (selectedDate) {
+      setDob(selectedDate);
+    }
+  };
+
+  const handleRegister = () => {
     if (
       !firstName ||
       !lastName ||
@@ -43,79 +45,23 @@ export default function RegistrationScreen({ navigation }: any) {
       !email ||
       !phone ||
       !address ||
+      !dob ||
       !password ||
       !confirmPassword ||
       !agree
     ) {
-      Alert.alert(
-        "Validation Error",
-        "Please fill all required fields and agree to our Privacy Policy"
-      );
-      return false;
-    }
-    if (password.length < 6) {
-      Alert.alert("Validation Error", "Password must be at least 6 characters");
-      return false;
-    } else if (password !== confirmPassword) {
-      Alert.alert("Validation Error", "Passwords do not match");
-      return false;
+      alert("Please fill out all fields and accept the privacy policy.");
+      return;
     }
 
-    const phoneRegex = /^\d{10,}$/;
-    if (!phoneRegex.test(phone)) {
-      Alert.alert(
-        "Validation Error",
-        "Phone number must contain at least 10 digits"
-      );
-      return false;
+    if (password !== confirmPassword) {
+      alert("Passwords do not match.");
+      return;
     }
 
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      Alert.alert("Validation Error", "Enter a valid email address");
-      return false;
-    }
-
-    const minDate = new Date();
-    minDate.setFullYear(minDate.getFullYear() - 18);
-    if (dob > minDate) {
-      Alert.alert("Validation Error", "You must be at least 18 years old");
-      return false;
-    }
-
-    return true;
+    // You can handle the register logic here
+    console.log("Registration successful!");
   };
-  const newUser: User = {
-    name: `${firstName} ${lastName}`,
-    email: email,
-    password: password,
-    avatar: "https://picsum.photos/800", // or let user pick later
-  };
-  // Create User API call
-  const handleRegister = async () => {
-    if (validateForm()) {
-      try {
-        const response = await axios.post(
-          `${APIConstant.BASE_URL}/users`,
-          newUser
-        );
-        // Check if the response is successful
-        if (response.status === 201) {
-          // If the registration is successful, navigate to the Login screen
-          Alert.alert("Success", "Registration Complete");
-          navigation.navigate("Login"); // Assuming "Login" is the name of the login screen in your stack
-        } else {
-          Alert.alert("Error", "Something went wrong, please try again.");
-        }
-      } catch (error) {
-        console.error(error);
-        Alert.alert("Error", "Something went wrong. Please try again.");
-      }
-    }
-  };
-
-  const maxDate = new Date();
-  maxDate.setFullYear(maxDate.getFullYear() - 1);
 
   return (
     <KeyboardAvoidingView
@@ -127,7 +73,8 @@ export default function RegistrationScreen({ navigation }: any) {
           contentContainerStyle={styles.container}
           keyboardShouldPersistTaps="handled"
         >
-          <Text style={styles.title}>Register</Text>
+          <Text style={styles.title}>Create an Account</Text>
+
           <TextInput
             style={styles.input}
             placeholder="First Name"
@@ -145,17 +92,25 @@ export default function RegistrationScreen({ navigation }: any) {
             style={styles.input}
             onPress={() => setShowGenderModal(true)}
           >
-            <Text style={{ color: gender ? "#000" : "#999" }}>
+            <Text style={{ color: gender ? "#000" : "#999", fontSize: 16 }}>
               {gender || "Select Gender"}
             </Text>
           </TouchableOpacity>
 
-          {/* Gender Modal */}
-          <Modal visible={showGenderModal} transparent animationType="slide">
-            <View style={styles.modalOverlay}>
+          <Modal
+            visible={showGenderModal}
+            animationType="fade"
+            transparent
+            onRequestClose={() => setShowGenderModal(false)}
+          >
+            <TouchableOpacity
+              style={styles.modalOverlay}
+              activeOpacity={1}
+              onPressOut={() => setShowGenderModal(false)}
+            >
               <View style={styles.modalContent}>
                 <Text style={styles.modalTitle}>Select Gender</Text>
-                {genderOptions.map((option) => (
+                {["Male", "Female", "Other"].map((option) => (
                   <TouchableOpacity
                     key={option}
                     style={styles.modalOption}
@@ -171,7 +126,7 @@ export default function RegistrationScreen({ navigation }: any) {
                   <Text style={styles.modalCancel}>Cancel</Text>
                 </TouchableOpacity>
               </View>
-            </View>
+            </TouchableOpacity>
           </Modal>
 
           <TextInput
@@ -195,7 +150,6 @@ export default function RegistrationScreen({ navigation }: any) {
             onChangeText={setAddress}
           />
 
-          {/* Date Picker Section */}
           <TouchableOpacity
             style={styles.dateInput}
             onPress={() => setShowDatePicker(true)}
@@ -205,39 +159,35 @@ export default function RegistrationScreen({ navigation }: any) {
             </Text>
           </TouchableOpacity>
 
-          {/* Date Picker Modal */}
           {showDatePicker && (
-            <Modal visible={showDatePicker} transparent animationType="fade">
+            <Modal
+              transparent
+              animationType="fade"
+              visible={showDatePicker}
+              onRequestClose={() => setShowDatePicker(false)}
+            >
               <View style={styles.datePickerModal}>
                 <View style={styles.datePickerContainer}>
-                  <Text style={styles.datePickerTitle}>
-                    Select Date of Birth
-                  </Text>
-
-                  <DatePicker
-                    value={dob}
+                  <Text style={styles.datePickerTitle}>Choose Your DOB</Text>
+                  <DateTimePicker
+                    value={dob || new Date()}
                     mode="date"
-                    display="spinner"
-                    maximumDate={maxDate}
-                    onChange={(event, selectedDate) => {
-                      if (event.type === "set" && selectedDate) {
-                        setDob(selectedDate);
-                      }
-                    }}
-                    style={styles.nativePicker} // optional
+                    display={Platform.OS === "ios" ? "spinner" : "default"}
+                    onChange={handleDateChange}
+                    maximumDate={new Date()}
+                    style={styles.nativePicker}
                   />
-
                   <TouchableOpacity
                     style={styles.datePickerButton}
                     onPress={() => setShowDatePicker(false)}
                   >
-                    <Text style={styles.datePickerButtonText}>Done</Text>
+                    <Text style={styles.datePickerButtonText}>Confirm</Text>
                   </TouchableOpacity>
                 </View>
               </View>
             </Modal>
           )}
-          {/* Password Fields */}
+
           <TextInput
             style={styles.input}
             placeholder="Password"
@@ -252,6 +202,7 @@ export default function RegistrationScreen({ navigation }: any) {
             onChangeText={setConfirmPassword}
             secureTextEntry
           />
+
           <View style={styles.checkboxRow}>
             <CheckBox
               value={agree}
@@ -266,20 +217,90 @@ export default function RegistrationScreen({ navigation }: any) {
           <TouchableOpacity style={styles.registerBtn} onPress={handleRegister}>
             <Text style={styles.registerText}>Register</Text>
           </TouchableOpacity>
+
+          <View style={{ height: 30 }} />
         </ScrollView>
       </TouchableWithoutFeedback>
     </KeyboardAvoidingView>
   );
-}
+};
+
+export default RegistrationScreen;
 
 const styles = StyleSheet.create({
+  container: {
+    flexGrow: 1,
+    paddingHorizontal: 20,
+    paddingTop: 50,
+    paddingBottom: 30,
+    backgroundColor: "#f4f4f4",
+  },
+  title: {
+    fontSize: 28,
+    fontWeight: "bold",
+    marginBottom: 25,
+    textAlign: "center",
+    color: "#333",
+  },
+  input: {
+    backgroundColor: "#fff",
+    padding: 14,
+    borderRadius: 10,
+    marginBottom: 12,
+    borderColor: "#ddd",
+    borderWidth: 1,
+    fontSize: 16,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 1,
+  },
+  dateInput: {
+    backgroundColor: "#fff",
+    padding: 14,
+    borderRadius: 10,
+    marginBottom: 12,
+    borderColor: "#ddd",
+    borderWidth: 1,
+  },
+  dateText: {
+    fontSize: 16,
+    color: "#333",
+  },
+  checkboxRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginVertical: 15,
+  },
+  checkboxText: {
+    marginLeft: 10,
+    fontSize: 14,
+    color: "#555",
+  },
+  registerBtn: {
+    backgroundColor: "#f57c00",
+    padding: 16,
+    borderRadius: 12,
+    alignItems: "center",
+    marginTop: 10,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  registerText: {
+    color: "#fff",
+    fontWeight: "600",
+    fontSize: 18,
+  },
   datePickerModal: {
     flex: 1,
     backgroundColor: "rgba(0,0,0,0.4)",
     justifyContent: "center",
     alignItems: "center",
   },
-
   datePickerContainer: {
     width: "85%",
     backgroundColor: "#fff",
@@ -287,13 +308,11 @@ const styles = StyleSheet.create({
     padding: 20,
     alignItems: "center",
   },
-
   datePickerTitle: {
     fontSize: 18,
     fontWeight: "600",
     marginBottom: 10,
   },
-
   datePickerButton: {
     marginTop: 15,
     backgroundColor: "#f57c00",
@@ -301,62 +320,13 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     paddingHorizontal: 25,
   },
-
   datePickerButtonText: {
     color: "#fff",
     fontWeight: "bold",
   },
-
   nativePicker: {
     width: "100%",
   },
-
-  container: {
-    flexGrow: 1,
-    padding: 20,
-    justifyContent: "center",
-    backgroundColor: "#f9f9f9",
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: "bold",
-    marginBottom: 20,
-    textAlign: "center",
-  },
-  input: {
-    backgroundColor: "#fff",
-    padding: 12,
-    borderRadius: 8,
-    marginBottom: 10,
-    borderColor: "#ccc",
-    borderWidth: 1,
-  },
-  dateInput: {
-    backgroundColor: "#fff",
-    padding: 12,
-    borderRadius: 8,
-    marginBottom: 10,
-    borderColor: "#ccc",
-    borderWidth: 1,
-  },
-  dateText: {
-    color: "#000",
-    fontSize: 16,
-  },
-  checkboxRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginVertical: 10,
-  },
-  checkboxText: { marginLeft: 8 },
-  registerBtn: {
-    backgroundColor: "#f57c00",
-    padding: 16,
-    borderRadius: 10,
-    alignItems: "center",
-    marginTop: 10,
-  },
-  registerText: { color: "white", fontWeight: "bold", fontSize: 16 },
   modalOverlay: {
     flex: 1,
     backgroundColor: "rgba(0,0,0,0.5)",
@@ -385,14 +355,4 @@ const styles = StyleSheet.create({
   },
   modalText: { fontSize: 16, color: "#000" },
   modalCancel: { marginTop: 15, color: "red" },
-  modalCloseBtn: {
-    backgroundColor: "#f57c00",
-    padding: 10,
-    borderRadius: 8,
-    marginTop: 20,
-  },
-  modalCloseText: {
-    color: "#fff",
-    fontWeight: "bold",
-  },
 });

@@ -5,13 +5,15 @@ import {
   TextInput,
   StyleSheet,
   TouchableOpacity,
-  ImageBackground,
   Switch,
   Alert,
+  KeyboardAvoidingView,
+  Platform,
+  TouchableWithoutFeedback,
+  Keyboard,
+  ScrollView,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
-import { StackNavigationProp } from "@react-navigation/stack";
-import { RootStackParams } from "../navigation/RootStack";
 import ApiManager from "../api/ApiManager";
 import { APIConstant } from "../api/APIConstants";
 import ReactNativeBiometrics from "react-native-biometrics";
@@ -19,35 +21,31 @@ import { saveUser } from "../utils/UserStorage";
 import { User } from "../model/User";
 
 const LoginScreen = ({ navigation }: any) => {
-  //const navigation = useNavigation<StackNavigationProp<RootStackParams>>();
   const [email, setEmail] = useState("john@mail.com");
   const [password, setPassword] = useState("changeme");
+  const [rememberMe, setRememberMe] = useState(false);
 
   const handleLogin = async () => {
     if (!email || !password) {
       Alert.alert("Validation Error", "Please enter email and password");
       return;
     }
-    console.log("Attempting login with email:", email, "password:", password);
+
     try {
       const response = await ApiManager.post(`${APIConstant.AUTH_LOGIN}`, {
         email,
         password,
       });
-      //console.log("Login response:", response);
+
       if (response?.access_token) {
         const { access_token, refresh_token } = response;
-        console.log("Login successful, tokens received:", {
-          access_token,
-          refresh_token,
-        });
-        // Fetch user profile with access token
+
         const profileRes = await ApiManager.get(`${APIConstant.AUTH_PROFILE}`, {
           headers: {
             Authorization: `Bearer ${access_token}`,
           },
         });
-        console.log("User profile response:", profileRes);
+
         const user: User = {
           id: profileRes.id,
           name: profileRes.name,
@@ -58,13 +56,13 @@ const LoginScreen = ({ navigation }: any) => {
           refreshToken: refresh_token,
         };
 
-        await saveUser(user); // Save to AsyncStorage
+        await saveUser(user);
 
         Alert.alert("Login Success", `Welcome ${user.name}!`);
         navigation.reset({
           index: 0,
-          routes: [{ name: "MainTabs" }], // 👈 replace with your Tab.Navigator wrapper name if defined
-        }); // Or any protected route
+          routes: [{ name: "MainTabs" }],
+        });
       } else {
         Alert.alert("Login Failed", "Invalid credentials");
       }
@@ -75,13 +73,10 @@ const LoginScreen = ({ navigation }: any) => {
   };
 
   const handleBiometricLogin = async () => {
-    console.log("Attempting biometric login");
     const rnBiometrics = new ReactNativeBiometrics();
-    console.log("Checking biometric availability");
-    const { available, biometryType } = await rnBiometrics.isSensorAvailable();
-    console.log("Biometric available:", available, "Type:", biometryType);
+    const { available } = await rnBiometrics.isSensorAvailable();
+
     if (!available) {
-      console.log("Biometric not available");
       Alert.alert(
         "Biometric Not Available",
         "Your device does not support biometric authentication."
@@ -95,9 +90,7 @@ const LoginScreen = ({ navigation }: any) => {
       });
 
       if (success) {
-        // Auto-login after biometric
-        // If storing email/password (securely), you can auto-login here
-        handleLogin(); // You can cache last email/password or use token
+        handleLogin();
       } else {
         Alert.alert("Failed", "Biometric authentication failed");
       }
@@ -106,93 +99,136 @@ const LoginScreen = ({ navigation }: any) => {
       Alert.alert("Error", "Something went wrong during biometric auth");
     }
   };
+
   return (
-    // <ImageBackground
-    //   source={require("../assets/login-bg.jpg")}
-    //   style={styles.bg}
-    // >
-    <View style={styles.overlay}>
-      <Text style={styles.logo}>🛒 ShopEasy</Text>
+    <KeyboardAvoidingView
+      behavior={Platform.OS === "ios" ? "padding" : undefined}
+      style={{ flex: 1 }}
+    >
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+        <ScrollView
+          contentContainerStyle={styles.container}
+          keyboardShouldPersistTaps="handled"
+        >
+          <Text style={styles.logo}>🛒 ShopEasy</Text>
 
-      <TextInput
-        style={styles.input}
-        placeholder="Email"
-        placeholderTextColor="#ccc"
-        keyboardType="email-address"
-        autoCapitalize="none"
-        value={email}
-        onChangeText={setEmail}
-      />
+          <TextInput
+            style={styles.input}
+            placeholder="Email"
+            placeholderTextColor="#999"
+            keyboardType="email-address"
+            autoCapitalize="none"
+            value={email}
+            onChangeText={setEmail}
+          />
 
-      <TextInput
-        style={styles.input}
-        placeholder="Password"
-        placeholderTextColor="#ccc"
-        secureTextEntry
-        value={password}
-        onChangeText={setPassword}
-      />
+          <TextInput
+            style={styles.input}
+            placeholder="Password"
+            placeholderTextColor="#999"
+            secureTextEntry
+            value={password}
+            onChangeText={setPassword}
+          />
 
-      <View style={styles.rememberRow}>
-        <Text style={styles.rememberText}>Remember Me</Text>
-        <Switch />
-      </View>
+          <View style={styles.rememberRow}>
+            <Text style={styles.rememberText}>Remember Me</Text>
+            <Switch value={rememberMe} onValueChange={setRememberMe} />
+          </View>
 
-      <TouchableOpacity
-        style={styles.faceLockBtn}
-        onPress={handleBiometricLogin}
-      >
-        <Text style={styles.faceLockText}>🔒 Use Face/Fingerprint</Text>
-      </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.faceLockBtn}
+            onPress={handleBiometricLogin}
+          >
+            <Text style={styles.faceLockText}>🔒 Use Face/Fingerprint</Text>
+          </TouchableOpacity>
 
-      <TouchableOpacity style={styles.loginBtn} onPress={handleLogin}>
-        <Text style={styles.loginText}>Login</Text>
-      </TouchableOpacity>
+          <TouchableOpacity style={styles.loginBtn} onPress={handleLogin}>
+            <Text style={styles.loginText}>Login</Text>
+          </TouchableOpacity>
 
-      <TouchableOpacity onPress={() => navigation.navigate("Register")}>
-        <Text style={styles.registerLink}>Register Now</Text>
-      </TouchableOpacity>
-    </View>
-    // </ImageBackground>
+          <TouchableOpacity onPress={() => navigation.navigate("Register")}>
+            <Text style={styles.registerLink}>
+              👉 Don’t have an account?{" "}
+              <Text style={styles.registerNow}>Register Now</Text>
+            </Text>
+          </TouchableOpacity>
+
+          <View style={{ height: 30 }} />
+        </ScrollView>
+      </TouchableWithoutFeedback>
+    </KeyboardAvoidingView>
   );
 };
 
 const styles = StyleSheet.create({
-  bg: { flex: 1 },
-  overlay: {
-    flex: 1,
-    backgroundColor: "rgba(0,0,0,0.6)",
-    padding: 20,
+  container: {
+    flexGrow: 1,
+    backgroundColor: "#f4f4f4",
     justifyContent: "center",
+    padding: 24,
   },
   logo: {
-    fontSize: 32,
+    fontSize: 30,
     fontWeight: "bold",
     textAlign: "center",
-    color: "white",
-    marginBottom: 40,
+    color: "#333",
+    marginBottom: 30,
   },
   input: {
-    backgroundColor: "white",
-    padding: 10,
-    borderRadius: 5,
-    marginBottom: 10,
+    backgroundColor: "#fff",
+    padding: 14,
+    borderRadius: 10,
+    marginBottom: 12,
+    borderColor: "#ddd",
+    borderWidth: 1,
+    fontSize: 16,
   },
   rememberRow: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginBottom: 10,
+    alignItems: "center",
+    marginBottom: 15,
   },
-  rememberText: { color: "white" },
-  faceLockBtn: { alignItems: "center", marginBottom: 20 },
-  faceLockText: { color: "white" },
+  rememberText: {
+    fontSize: 14,
+    color: "#555",
+  },
+  faceLockBtn: {
+    alignItems: "center",
+    marginBottom: 20,
+  },
+  faceLockText: {
+    color: "#555",
+    fontSize: 15,
+  },
   loginBtn: {
     backgroundColor: "#00b894",
-    padding: 12,
-    borderRadius: 5,
+    padding: 16,
+    borderRadius: 12,
     alignItems: "center",
+    marginTop: 10,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.15,
+    shadowRadius: 3,
+    elevation: 3,
   },
-  loginText: { color: "white", fontWeight: "bold" },
-  registerLink: { marginTop: 15, color: "#0984e3", textAlign: "center" },
+  loginText: {
+    color: "#fff",
+    fontSize: 18,
+    fontWeight: "bold",
+  },
+  registerLink: {
+    marginTop: 20,
+    textAlign: "center",
+    color: "#666",
+    fontSize: 14,
+  },
+  registerNow: {
+    color: "#00cec9",
+    fontWeight: "bold",
+  },
 });
+
 export default LoginScreen;

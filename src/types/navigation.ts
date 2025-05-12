@@ -1,7 +1,10 @@
 import { Product } from "../model/Product";
 
 export type RootStackParamList = {
-  Home: undefined;
+  Home: {
+    screen?: keyof HomeStackParamList;
+    params?: any;
+  };
   Details: undefined;
   Shop: {
     screen?: keyof ShopStackParamList;
@@ -12,15 +15,23 @@ export type RootStackParamList = {
     screen?: keyof AccountStackParamList;
     params?: any;
   };
+  Cart: undefined;
+  // ProductDetails: { productId: number };
 };
 // navigation/types.ts
 export type AccountStackParamList = {
   AccountMain: undefined;
   Settings: undefined;
+  ProductDetails: { productId: number };
 };
 
 // navigation/types.ts
 export type ShopStackParamList = {
   ShopMain: undefined;
+  ProductDetails: { productId: number };
+};
+
+export type HomeStackParamList = {
+  HomeMain: undefined;
   ProductDetails: { productId: number };
 };

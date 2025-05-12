@@ -26,10 +26,10 @@ import { User } from "../model/User";
 import { useApp } from "../context/AppContext";
 
 type AccountNavProp = CompositeNavigationProp<
-  BottomTabNavigationProp<RootStackParamList, "Account">,
+  BottomTabNavigationProp<RootStackParamList>,
   StackNavigationProp<AccountStackParamList, "AccountMain">
 >;
-
+//const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
 const AccountScreen = () => {
   const navigation = useNavigation<AccountNavProp>();
   const [user, setUser] = useState<User | null>(null);
@@ -42,6 +42,12 @@ const AccountScreen = () => {
     };
     loadUser();
   }, []);
+
+  // Navigate to Product Details screen
+  const handleProductPress = (productId: number) => {
+    navigation.navigate("ProductDetails", { productId: productId }); // Passing productId to ProductDetails screen
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView showsVerticalScrollIndicator={false}>
@@ -54,12 +60,6 @@ const AccountScreen = () => {
           <View style={styles.headerIcons}>
             <Ionicons
               name="notifications-outline"
-              size={24}
-              color="black"
-              style={styles.icon}
-            />
-            <FontAwesome
-              name="cog"
               size={24}
               color="black"
               style={styles.icon}
@@ -92,21 +92,30 @@ const AccountScreen = () => {
         </View>
 
         {/* Recently Viewed */}
-        <Text style={styles.sectionTitle}>Recently viewed</Text>
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          style={styles.recentlyViewed}
-        >
-          {recentlyViewed.map((product) => (
-            <View key={product.id} style={styles.viewedItem}>
-              <Image
-                source={{ uri: product.images[0] }}
-                style={styles.viewedItem}
-              />
-            </View>
-          ))}
-        </ScrollView>
+
+        {recentlyViewed.length > 0 && (
+          <>
+            <Text style={styles.sectionTitle}>Recently viewed</Text>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              style={styles.recentlyViewed}
+            >
+              {recentlyViewed.map((product) => (
+                <View key={product.id} style={styles.viewedItem}>
+                  <TouchableOpacity
+                    onPress={() => handleProductPress(product.id)}
+                  >
+                    <Image
+                      source={{ uri: product.images[0] }}
+                      style={styles.viewedItem}
+                    />
+                  </TouchableOpacity>
+                </View>
+              ))}
+            </ScrollView>
+          </>
+        )}
 
         {/* My Orders */}
         <Text style={styles.sectionTitle}>My Orders</Text>

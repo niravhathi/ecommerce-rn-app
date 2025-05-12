@@ -3,12 +3,13 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import Ionicons from "react-native-vector-icons/Ionicons";
 
 // Import screens
-import HomeScreen from "../screens/HomeScreen";
 import CartScreen from "../screens/CartScreen";
 import AccountStack from "./AccountStack";
 import ShopStack from "./ShopStack";
+import HomeStack from "./HomeStack";
+import { RootStackParamList } from "../types/navigation";
 
-const Tab = createBottomTabNavigator();
+const Tab = createBottomTabNavigator<RootStackParamList>();
 
 const RootNavigator = () => {
   return (
@@ -17,7 +18,7 @@ const RootNavigator = () => {
       screenOptions={({ route }) => ({
         tabBarIcon: ({ focused, color, size }) => {
           let iconName: string = "";
-
+          console.log("route.name", route.name);
           if (route.name === "Home") {
             iconName = focused ? "home" : "home-outline";
           } else if (route.name === "Shop") {
@@ -34,21 +35,15 @@ const RootNavigator = () => {
         tabBarInactiveTintColor: "gray",
       })}
     >
-      <Tab.Screen name="Home" component={HomeScreen} />
+      <Tab.Screen
+        name="Home"
+        component={HomeStack}
+        options={{ headerShown: false }}
+      />
       <Tab.Screen
         name="Shop"
         component={ShopStack}
-        options={({ navigation }) => ({
-          headerLeft: () => (
-            <Ionicons
-              name="filter-outline"
-              size={30}
-              color="black"
-              onPress={() => navigation.navigate("Filter")}
-            />
-          ),
-          headerShown: false,
-        })}
+        options={{ headerShown: false }}
       />
       <Tab.Screen name="Cart" component={CartScreen} />
       <Tab.Screen

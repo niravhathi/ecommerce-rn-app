@@ -9,6 +9,8 @@ import {
   TextInput,
   Image,
   ScrollView,
+  Modal,
+  ActivityIndicator,
 } from "react-native";
 import ApiManager from "../api/ApiManager";
 import { APIConstant } from "../api/APIConstants";
@@ -19,17 +21,27 @@ import {
   CompositeNavigationProp,
   useNavigation,
 } from "@react-navigation/native";
-import { RootStackParamList, ShopStackParamList } from "../types/navigation";
+import { HomeStackParamList, RootStackParamList } from "../types/navigation";
 import { StackNavigationProp } from "@react-navigation/stack";
+import BannerCarousel from "../screens/components/BannerCarousel";
+import CategoryList from "../screens/components/CategoryList";
+import FlashSale from "../screens/components/FlashSale";
+import ProductGrid from "../screens/components/ProductGrid";
 import { BottomTabNavigationProp } from "@react-navigation/bottom-tabs";
+
+type HomeNavProp = CompositeNavigationProp<
+  BottomTabNavigationProp<RootStackParamList>,
+  StackNavigationProp<HomeStackParamList, "HomeMain">
+>;
 
 const HomeScreen = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
+  // const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
   // const navigation = useNavigation<ShopNavProp>();
+  const navigation = useNavigation<HomeNavProp>();
   useEffect(() => {
     const fetchProducts = async () => {
       try {
@@ -74,10 +86,11 @@ const HomeScreen = () => {
   );
   // Navigate to Product Details screen
   const handleProductPress = (productId: number) => {
-    navigation.navigate("Shop", {
-      screen: "ProductDetails",
-      params: { productId: productId }, // Pass the productId here
-    }); // Passing productId to ProductDetails screen
+    // navigation.navigate("Account", {
+    //   screen: "ProductDetails",
+    //   params: { productId: productId }, // Pass the productId here
+    // }); // Passing productId to ProductDetails screen
+    navigation.navigate("ProductDetails", { productId: productId });
   };
 
   const renderProduct = ({ item }: { item: Product }) => (
@@ -132,12 +145,8 @@ const HomeScreen = () => {
           placeholder="Search products..."
           value={searchQuery}
           onChangeText={handleSearchChange}
-          // onSubmitEditing={searchProducts} // Trigger search when user presses enter
         />
-
-        {/* Loading Indicator */}
-        {isLoading && <Text>Loading...</Text>}
-
+        {/* {isLoading && <Text>Loading...</Text>} */}
         <Icon
           name="shopping-cart"
           size={30}
@@ -145,28 +154,62 @@ const HomeScreen = () => {
           style={styles.cartIcon}
         />
       </View>
-
-      {/* Category Section */}
-      <Text style={styles.sectionTitle}>Categories</Text>
-      <FlatList
-        data={categories}
-        renderItem={renderCategory}
-        keyExtractor={(item) => item.id.toString()}
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.categoryList}
-      />
-
-      {/* Featured Products Section */}
-      <Text style={styles.sectionTitle}>Featured Products</Text>
+      {/* <ScrollView style={styles.container}>
+        <BannerCarousel />
+        <CategoryList categories={categories} />
+        {isLoading ? (
+          <View style={styles.inlineLoader}>
+            <ActivityIndicator size="large" color="#f57c00" />
+          </View>
+        ) : (
+          <>
+            <FlashSale products={products} navigation={navigation} />
+            <ProductGrid
+              title="Featured Products"
+              products={products}
+              navigation={navigation}
+            />
+          </>
+        )}
+      </ScrollView> */}
       <FlatList
         data={products}
-        renderItem={renderProduct}
         keyExtractor={(item) => item.id.toString()}
-        numColumns={2}
-        columnWrapperStyle={styles.productRow}
-        contentContainerStyle={styles.productList}
+        renderItem={({ item }) => (
+          <TouchableOpacity
+            style={styles.productCard}
+            onPress={() => handleProductPress(item.id)}
+          >
+            <Image
+              source={{ uri: item.images[0] }}
+              style={styles.productImage}
+            />
+            <Text style={styles.productTitle}>{item.title}</Text>
+            <Text style={styles.productPrice}>${item.price}</Text>
+          </TouchableOpacity>
+        )}
+        numColumns={2} // Two products per row
+        ListHeaderComponent={
+          <>
+            <BannerCarousel />
+            <CategoryList categories={categories} />
+            {isLoading ? (
+              <View style={styles.inlineLoader}>
+                <ActivityIndicator size="large" color="#f57c00" />
+              </View>
+            ) : (
+              <FlashSale products={products} navigation={navigation} />
+            )}
+          </>
+        }
+        contentContainerStyle={{ padding: 8 }}
       />
+
+      {/* <Modal visible={isLoading} transparent animationType="fade">
+        <View style={styles.loadingOverlay}>
+          <ActivityIndicator size="large" color="#f57c00" />
+        </View>
+      </Modal> */}
     </View>
   );
 };
@@ -204,24 +247,24 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#f4f4f4",
-    padding: 16,
+    padding: 8,
   },
   header: {
     flexDirection: "row",
-    justifyContent: "space-between",
+    paddingHorizontal: 8,
     alignItems: "center",
     marginBottom: 16,
   },
   searchInput: {
-    width: "80%",
+    width: "90%",
     height: 40,
     borderColor: "#ccc",
     borderWidth: 1,
     borderRadius: 8,
-    paddingLeft: 10,
   },
   cartIcon: {
-    marginLeft: 10,
+    marginLeft: 16,
+    paddingRight: 8,
   },
   sectionTitle: {
     fontSize: 20,
@@ -238,9 +281,8 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     borderRadius: 8,
     padding: 10,
-    marginBottom: 15,
-    marginRight: 10,
-    width: "45%", // Two products per row
+    marginVertical: 8,
+    width: "50%", // fit 2 columns with some spacing
   },
   productImage: {
     width: "100%",
@@ -255,6 +297,17 @@ const styles = StyleSheet.create({
   productPrice: {
     fontSize: 14,
     color: "#888",
+  },
+  // loadingOverlay: {
+  //   flex: 1,
+  //   backgroundColor: "rgba(0, 0, 0, 0.4)", // semi-transparent background
+  //   justifyContent: "center",
+  //   alignItems: "center",
+  // },
+  inlineLoader: {
+    marginVertical: 40,
+    alignItems: "center",
+    justifyContent: "center",
   },
 });
 

@@ -93,6 +93,7 @@ const ShopScreen = () => {
       screen: "ProductDetails",
       params: { productId: productId }, // Pass the productId here
     }); // Passing productId to ProductDetails screen
+    //  navigation.navigate("ProductDetails", { productId: productId });
   };
 
   const renderProductCard = ({ item }: { item: Product }) => (

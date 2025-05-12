@@ -4,7 +4,7 @@ import React from "react";
 import { createStackNavigator } from "@react-navigation/stack";
 import ShopScreen from "../screens/ShopScreen"; // Import ShopScreen
 import ProductDetailsScreen from "../screens/ProductDetailsScreen"; // Import ProductDetailsScreen
-import { ShopStackParamList } from "../types/navigation";
+import { RootStackParamList, ShopStackParamList } from "../types/navigation";
 
 const Stack = createStackNavigator<ShopStackParamList>();
 
@@ -14,12 +14,15 @@ const ShopStack = () => {
       <Stack.Screen
         name="ShopMain"
         component={ShopScreen}
-        options={{ title: "Shop", headerShown: true }}
+        options={{ title: "Shop" }}
       />
       <Stack.Screen
         name="ProductDetails"
         component={ProductDetailsScreen}
-        options={{ title: "Product Details", headerShown: true }} // ✅ this shows back button
+        options={{
+          title: "Product Details",
+          headerBackButtonDisplayMode: "minimal",
+        }}
       />
     </Stack.Navigator>
   );
