@@ -28,6 +28,7 @@ import CategoryList from "../screens/components/CategoryList";
 import FlashSale from "../screens/components/FlashSale";
 import ProductGrid from "../screens/components/ProductGrid";
 import { BottomTabNavigationProp } from "@react-navigation/bottom-tabs";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 type HomeNavProp = CompositeNavigationProp<
   BottomTabNavigationProp<RootStackParamList>,
@@ -46,7 +47,8 @@ const HomeScreen = () => {
     const fetchProducts = async () => {
       try {
         const response = await ApiManager.get(APIConstant.PRODUCTS);
-        setProducts(response);
+        console.log("Products:", response.products);
+        setProducts(response.products);
       } catch (error) {
         console.error("Error fetching products:", error);
       }
@@ -137,24 +139,25 @@ const HomeScreen = () => {
   };
 
   return (
-    <View style={styles.container}>
-      {/* Header with Search Bar */}
-      <View style={styles.header}>
-        <TextInput
-          style={styles.searchInput}
-          placeholder="Search products..."
-          value={searchQuery}
-          onChangeText={handleSearchChange}
-        />
-        {/* {isLoading && <Text>Loading...</Text>} */}
-        <Icon
-          name="shopping-cart"
-          size={30}
-          color="black"
-          style={styles.cartIcon}
-        />
-      </View>
-      {/* <ScrollView style={styles.container}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: "#f9f9f9" }}>
+      <View style={styles.container}>
+        {/* Header with Search Bar */}
+        <View style={styles.header}>
+          <TextInput
+            style={styles.searchInput}
+            placeholder="Search products..."
+            value={searchQuery}
+            onChangeText={handleSearchChange}
+          />
+          {/* {isLoading && <Text>Loading...</Text>} */}
+          <Icon
+            name="shopping-cart"
+            size={30}
+            color="black"
+            style={styles.cartIcon}
+          />
+        </View>
+        {/* <ScrollView style={styles.container}>
         <BannerCarousel />
         <CategoryList categories={categories} />
         {isLoading ? (
@@ -172,45 +175,46 @@ const HomeScreen = () => {
           </>
         )}
       </ScrollView> */}
-      <FlatList
-        data={products}
-        keyExtractor={(item) => item.id.toString()}
-        renderItem={({ item }) => (
-          <TouchableOpacity
-            style={styles.productCard}
-            onPress={() => handleProductPress(item.id)}
-          >
-            <Image
-              source={{ uri: item.images[0] }}
-              style={styles.productImage}
-            />
-            <Text style={styles.productTitle}>{item.title}</Text>
-            <Text style={styles.productPrice}>${item.price}</Text>
-          </TouchableOpacity>
-        )}
-        numColumns={2} // Two products per row
-        ListHeaderComponent={
-          <>
-            <BannerCarousel />
-            <CategoryList categories={categories} />
-            {isLoading ? (
-              <View style={styles.inlineLoader}>
-                <ActivityIndicator size="large" color="#f57c00" />
-              </View>
-            ) : (
-              <FlashSale products={products} navigation={navigation} />
-            )}
-          </>
-        }
-        contentContainerStyle={{ padding: 8 }}
-      />
+        <FlatList
+          data={products}
+          keyExtractor={(item) => item.id.toString()}
+          renderItem={({ item }) => (
+            <TouchableOpacity
+              style={styles.productCard}
+              onPress={() => handleProductPress(item.id)}
+            >
+              <Image
+                source={{ uri: item.images[0] }}
+                style={styles.productImage}
+              />
+              <Text style={styles.productTitle}>{item.title}</Text>
+              <Text style={styles.productPrice}>${item.price}</Text>
+            </TouchableOpacity>
+          )}
+          numColumns={2} // Two products per row
+          ListHeaderComponent={
+            <>
+              <BannerCarousel />
+              <CategoryList categories={categories} />
+              {isLoading ? (
+                <View style={styles.inlineLoader}>
+                  <ActivityIndicator size="large" color="#f57c00" />
+                </View>
+              ) : (
+                <FlashSale products={products} navigation={navigation} />
+              )}
+            </>
+          }
+          contentContainerStyle={{ padding: 8 }}
+        />
 
-      {/* <Modal visible={isLoading} transparent animationType="fade">
+        {/* <Modal visible={isLoading} transparent animationType="fade">
         <View style={styles.loadingOverlay}>
           <ActivityIndicator size="large" color="#f57c00" />
         </View>
       </Modal> */}
-    </View>
+      </View>
+    </SafeAreaView>
   );
 };
 
@@ -248,6 +252,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#f4f4f4",
     padding: 8,
+    marginTop: 10,
   },
   header: {
     flexDirection: "row",
@@ -271,9 +276,6 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     marginVertical: 10,
   },
-  productRow: {
-    justifyContent: "space-between",
-  },
   productList: {
     paddingBottom: 20,
   },
@@ -282,7 +284,8 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     padding: 10,
     marginVertical: 8,
-    width: "50%", // fit 2 columns with some spacing
+    width: "48%",
+    marginRight: 16,
   },
   productImage: {
     width: "100%",

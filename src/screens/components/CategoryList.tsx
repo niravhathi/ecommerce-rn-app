@@ -6,15 +6,15 @@ import {
   View,
   StyleSheet,
   TouchableOpacity,
-  Image,
 } from "react-native";
 import { Category } from "../../model/Category";
 
 const CategoryList = ({ categories }: { categories: Category[] }) => {
+  console.log("Categories:", categories);
+
   const renderCategory = ({ item }: { item: Category }) => (
-    <TouchableOpacity style={styles.categoryItem}>
-      <Image source={{ uri: item.image }} style={styles.categoryImage} />
-      <Text style={styles.categoryText} numberOfLines={2}>
+    <TouchableOpacity style={styles.tag}>
+      <Text style={styles.tagText} numberOfLines={1}>
         {item.name}
       </Text>
     </TouchableOpacity>
@@ -26,10 +26,10 @@ const CategoryList = ({ categories }: { categories: Category[] }) => {
       <FlatList
         data={categories}
         renderItem={renderCategory}
-        keyExtractor={(item) => item.id.toString()}
+        keyExtractor={(item) => item.name}
         horizontal
         showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.categoryList}
+        contentContainerStyle={styles.tagList}
       />
     </View>
   );
@@ -41,28 +41,20 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     marginVertical: 10,
   },
-  categoryList: { paddingVertical: 10 },
-  categoryItem: {
-    alignItems: "center",
-    width: 90,
-    height: 100,
-    backgroundColor: "#fff",
-    borderRadius: 8,
+  tagList: {
+    paddingVertical: 10,
+  },
+  tag: {
+    backgroundColor: "#eee",
+    borderRadius: 20,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
     marginRight: 10,
   },
-  categoryImage: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    marginBottom: 8,
-    marginTop: 8,
-    resizeMode: "cover",
-  },
-  categoryText: {
-    fontSize: 12,
-    fontWeight: "500",
+  tagText: {
+    fontSize: 14,
     color: "#333",
-    textAlign: "center",
+    fontWeight: "500",
   },
 });
 

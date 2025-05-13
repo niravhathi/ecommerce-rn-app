@@ -10,6 +10,7 @@ import {
 } from "react-native";
 import { useApp } from "../context/AppContext";
 import { CartItem, Product } from "../model/Product";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 const mockWishlist: CartItem[] = [
   {
@@ -19,14 +20,7 @@ const mockWishlist: CartItem[] = [
     price: 90,
     description:
       "Elevate your casual wear with our Classic Grey Hooded Sweatshirt. Made from a soft cotton blend, this hoodie features a front kangaroo pocket, an adjustable drawstring hood, and ribbed cuffs for a snug fit. Perfect for those chilly evenings or lazy weekends, it pairs effortlessly with your favorite jeans or joggers.",
-    category: {
-      id: 1,
-      name: "Clothessssss",
-      slug: "clothessssss",
-      image: "https://i.imgur.com/QkIa5tT.jpeg",
-      creationAt: "2025-05-04T08:28:47.000Z",
-      updatedAt: "2025-05-04T10:18:02.000Z",
-    },
+    category: "cloths",
     images: [
       "https://i.imgur.com/R2PN9Wq.jpeg",
       "https://i.imgur.com/IvxMPFr.jpeg",
@@ -42,14 +36,7 @@ const mockWishlist: CartItem[] = [
     price: 79,
     description:
       "Elevate your casual wardrobe with our Classic Black Hooded Sweatshirt. Made from high-quality, soft fabric that ensures comfort and durability, this hoodie features a spacious kangaroo pocket and an adjustable drawstring hood. Its versatile design makes it perfect for a relaxed day at home or a casual outing.",
-    category: {
-      id: 1,
-      name: "Clothessssss",
-      slug: "clothessssss",
-      image: "https://i.imgur.com/QkIa5tT.jpeg",
-      creationAt: "2025-05-04T08:28:47.000Z",
-      updatedAt: "2025-05-04T10:18:02.000Z",
-    },
+    category: "cloths",
     images: [
       "https://i.imgur.com/cSytoSD.jpeg",
       "https://i.imgur.com/WwKucXb.jpeg",
@@ -67,14 +54,7 @@ const mockPopular: CartItem[] = [
     price: 25,
     description:
       "Discover the perfect blend of style and comfort with our Classic Comfort Fit Joggers. These versatile black joggers feature a soft elastic waistband with an adjustable drawstring, two side pockets, and ribbed ankle cuffs for a secure fit. Made from a lightweight and durable fabric, they are ideal for both active days and relaxed lounging.",
-    category: {
-      id: 1,
-      name: "Clothessssss",
-      slug: "clothessssss",
-      image: "https://i.imgur.com/QkIa5tT.jpeg",
-      creationAt: "2025-05-04T08:28:47.000Z",
-      updatedAt: "2025-05-04T10:18:02.000Z",
-    },
+    category: "cloths",
     images: [
       "https://i.imgur.com/ZKGofuB.jpeg",
       "https://i.imgur.com/GJi73H0.jpeg",
@@ -90,14 +70,7 @@ const mockPopular: CartItem[] = [
     price: 79,
     description:
       "Experience the perfect blend of comfort and style with our Classic Comfort Drawstring Joggers. Designed for a relaxed fit, these joggers feature a soft, stretchable fabric, convenient side pockets, and an adjustable drawstring waist with elegant gold-tipped detailing. Ideal for lounging or running errands, these pants will quickly become your go-to for effortless, casual wear.",
-    category: {
-      id: 1,
-      name: "Clothessssss",
-      slug: "clothessssss",
-      image: "https://i.imgur.com/QkIa5tT.jpeg",
-      creationAt: "2025-05-04T08:28:47.000Z",
-      updatedAt: "2025-05-04T10:18:02.000Z",
-    },
+    category: "cloths",
     images: [
       "https://i.imgur.com/mp3rUty.jpeg",
       "https://i.imgur.com/JQRGIc2.jpeg",
@@ -161,52 +134,54 @@ export default function CartScreen() {
   );
 
   return (
-    <ScrollView style={styles.container}>
-      <Text style={styles.header}>
-        Cart <Text style={styles.cartCount}>{cartItems.length}</Text>
-      </Text>
-      {renderHeader()}
-      {cartItems.length > 0 ? (
-        <>
-          {cartItems.map((item) => renderProduct(item, true))}
-          <Text style={styles.total}>
-            Total $
-            {cartItems
-              .reduce((sum, p) => sum + p.price * (p.quantity ?? 1), 0)
-              .toFixed(2)}
-          </Text>
-        </>
-      ) : wishlistItems.length > 0 ? (
-        <>
-          {renderEmptyCartIcon()}
-          <Text style={styles.sectionTitle}>From Your Wishlist</Text>
-          {wishlistItems.map((item) => renderProduct(item))}
-          <Text style={styles.total}>Total $0.00</Text>
-        </>
-      ) : (
-        <>{renderEmptyCartIcon()}</>
-      )}
-      <Text style={styles.sectionTitle}>Most Popular</Text>
-      <FlatList
-        data={mockPopular}
-        horizontal
-        keyExtractor={(item) => item.id.toString()}
-        renderItem={({ item }) => (
-          <View style={styles.popularItem}>
-            <Image
-              source={{ uri: item.images[0] }}
-              style={styles.popularImage}
-            />
-            <Text>${item.price.toFixed(2)}</Text>
-          </View>
+    <SafeAreaView style={{ flex: 1, backgroundColor: "#f9f9f9" }}>
+      <ScrollView style={styles.container}>
+        <Text style={styles.header}>
+          Cart <Text style={styles.cartCount}>{cartItems.length}</Text>
+        </Text>
+        {renderHeader()}
+        {cartItems.length > 0 ? (
+          <>
+            {cartItems.map((item) => renderProduct(item, true))}
+            <Text style={styles.total}>
+              Total $
+              {cartItems
+                .reduce((sum, p) => sum + p.price * (p.quantity ?? 1), 0)
+                .toFixed(2)}
+            </Text>
+          </>
+        ) : wishlistItems.length > 0 ? (
+          <>
+            {renderEmptyCartIcon()}
+            <Text style={styles.sectionTitle}>From Your Wishlist</Text>
+            {wishlistItems.map((item) => renderProduct(item))}
+            <Text style={styles.total}>Total $0.00</Text>
+          </>
+        ) : (
+          <>{renderEmptyCartIcon()}</>
         )}
-        showsHorizontalScrollIndicator={false}
-      />
-      {/* <Text style={styles.total}>Total $0.00</Text> */}
-      <TouchableOpacity style={styles.checkoutBtn}>
-        <Text style={styles.checkoutText}>Checkout</Text>
-      </TouchableOpacity>
-    </ScrollView>
+        <Text style={styles.sectionTitle}>Most Popular</Text>
+        <FlatList
+          data={mockPopular}
+          horizontal
+          keyExtractor={(item) => item.id.toString()}
+          renderItem={({ item }) => (
+            <View style={styles.popularItem}>
+              <Image
+                source={{ uri: item.images[0] }}
+                style={styles.popularImage}
+              />
+              <Text>${item.price.toFixed(2)}</Text>
+            </View>
+          )}
+          showsHorizontalScrollIndicator={false}
+        />
+        {/* <Text style={styles.total}>Total $0.00</Text> */}
+        <TouchableOpacity style={styles.checkoutBtn}>
+          <Text style={styles.checkoutText}>Checkout</Text>
+        </TouchableOpacity>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 

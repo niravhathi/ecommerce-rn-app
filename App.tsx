@@ -12,12 +12,12 @@ const App = () => {
 
   return (
     <AppProvider>
-      <NavigationContainer>
-        <SafeAreaProvider>
+      <SafeAreaProvider>
+        <NavigationContainer>
           {/* <RootNavigator /> */}
           <RootStack />
-        </SafeAreaProvider>
-      </NavigationContainer>
+        </NavigationContainer>
+      </SafeAreaProvider>
     </AppProvider>
   );
 };

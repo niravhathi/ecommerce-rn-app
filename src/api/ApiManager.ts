@@ -2,7 +2,7 @@
 import { APIConstant } from "./APIConstants";
 
 class ApiManager {
-  static baseUrl: string = "https://api.escuelajs.co/api/v1"; // Default base URL
+  static baseUrl: string = "https://dummyjson.com"; // Default base URL//https://api.escuelajs.co/api/v1
 
   static init(baseUrl: string = APIConstant.BASE_URL) {
     this.baseUrl = baseUrl;
@@ -37,7 +37,8 @@ class ApiManager {
   // Generic function to make POST requests
   static async post(endpoint: string, body: object) {
     const url = `${this.baseUrl}${endpoint}`;
-    console.log("Posting to URL:", url); // Log the URL being posted to
+    console.log("Posting:", url);
+    console.log("Posting body", body); // Log the URL being posted to
     try {
       const jsonBody = JSON.stringify(body); // Encode the body as a JSON string
 

@@ -8,54 +8,57 @@ import AccountStack from "./AccountStack";
 import ShopStack from "./ShopStack";
 import HomeStack from "./HomeStack";
 import { RootStackParamList } from "../types/navigation";
+import { SafeAreaProvider } from "react-native-safe-area-context";
 
 const Tab = createBottomTabNavigator<RootStackParamList>();
 
 const RootNavigator = () => {
   return (
-    <Tab.Navigator
-      initialRouteName="Home"
-      screenOptions={({ route }) => ({
-        tabBarIcon: ({ focused, color, size }) => {
-          let iconName: string = "";
-          console.log("route.name", route.name);
-          if (route.name === "Home") {
-            iconName = focused ? "home" : "home-outline";
-          } else if (route.name === "Shop") {
-            iconName = focused ? "pricetag" : "pricetag-outline";
-          } else if (route.name === "Cart") {
-            iconName = focused ? "cart" : "cart-outline";
-          } else if (route.name === "Account") {
-            iconName = focused ? "person" : "person-outline";
-          }
+    <SafeAreaProvider>
+      <Tab.Navigator
+        initialRouteName="Home"
+        screenOptions={({ route }) => ({
+          tabBarIcon: ({ focused, color, size }) => {
+            let iconName: string = "";
+            console.log("route.name", route.name);
+            if (route.name === "Home") {
+              iconName = focused ? "home" : "home-outline";
+            } else if (route.name === "Shop") {
+              iconName = focused ? "pricetag" : "pricetag-outline";
+            } else if (route.name === "Cart") {
+              iconName = focused ? "cart" : "cart-outline";
+            } else if (route.name === "Account") {
+              iconName = focused ? "person" : "person-outline";
+            }
 
-          return <Ionicons name={iconName} size={size} color={color} />;
-        },
-        tabBarActiveTintColor: "#007AFF",
-        tabBarInactiveTintColor: "gray",
-      })}
-    >
-      <Tab.Screen
-        name="Home"
-        component={HomeStack}
-        options={{ headerShown: false }}
-      />
-      <Tab.Screen
-        name="Shop"
-        component={ShopStack}
-        options={{ headerShown: false }}
-      />
-      <Tab.Screen
-        name="Cart"
-        component={CartScreen}
-        options={{ headerShown: false }}
-      />
-      <Tab.Screen
-        name="Account"
-        component={AccountStack}
-        options={{ headerShown: false }}
-      />
-    </Tab.Navigator>
+            return <Ionicons name={iconName} size={size} color={color} />;
+          },
+          tabBarActiveTintColor: "#007AFF",
+          tabBarInactiveTintColor: "gray",
+        })}
+      >
+        <Tab.Screen
+          name="Home"
+          component={HomeStack}
+          options={{ headerShown: false }}
+        />
+        <Tab.Screen
+          name="Shop"
+          component={ShopStack}
+          options={{ headerShown: false }}
+        />
+        <Tab.Screen
+          name="Cart"
+          component={CartScreen}
+          options={{ headerShown: false }}
+        />
+        <Tab.Screen
+          name="Account"
+          component={AccountStack}
+          options={{ headerShown: false }}
+        />
+      </Tab.Navigator>
+    </SafeAreaProvider>
   );
 };
 

@@ -75,7 +75,9 @@ const AccountScreen = () => {
         </View>
 
         {/* Greeting */}
-        <Text style={styles.greeting}>Hello, {user?.name || "Guest"}!</Text>
+        <Text style={styles.greeting}>
+          Hello, {user?.firstName || "Guest"}!
+        </Text>
 
         {/* Announcement */}
         <View style={styles.announcementBox}>

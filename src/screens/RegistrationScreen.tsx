@@ -14,6 +14,9 @@ import {
 } from "react-native";
 import CheckBox from "@react-native-community/checkbox";
 import DateTimePicker from "@react-native-community/datetimepicker";
+import { User } from "../model/User";
+import ApiManager from "../api/ApiManager";
+import { APIConstant } from "../api/APIConstants";
 
 const RegistrationScreen = () => {
   const [firstName, setFirstName] = useState("");
@@ -22,7 +25,7 @@ const RegistrationScreen = () => {
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [address, setAddress] = useState("");
-  const [dob, setDob] = useState<Date | null>(null);
+  const [birthDate, setDob] = useState<Date | null>(null);
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [agree, setAgree] = useState(false);
@@ -37,7 +40,7 @@ const RegistrationScreen = () => {
     }
   };
 
-  const handleRegister = () => {
+  const handleRegister = async () => {
     if (
       !firstName ||
       !lastName ||
@@ -45,7 +48,7 @@ const RegistrationScreen = () => {
       !email ||
       !phone ||
       !address ||
-      !dob ||
+      !birthDate ||
       !password ||
       !confirmPassword ||
       !agree
@@ -59,10 +62,30 @@ const RegistrationScreen = () => {
       return;
     }
 
-    // You can handle the register logic here
-    console.log("Registration successful!");
-  };
+    // Construct user object matching API expectation
+    const user: User = {
+      firstName,
+      lastName,
+      email,
+      password,
+      username: `${firstName.toLowerCase()}${lastName.toLowerCase()}`, // or any custom logic
+      gender,
+      birthDate: birthDate.toISOString().split("T")[0], // "YYYY-MM-DD"
+      phone,
+      image: "https://dummyjson.com/icon/default/128", // optional default
+      role: "customer", // default role
+    };
 
+    try {
+      const response = await ApiManager.post(APIConstant.REGISTER_USER, user);
+      console.log("User registered:", response);
+      alert("Registration successful!");
+      // Optionally save response to local storage or navigate to login
+    } catch (error) {
+      console.error("Registration error:", error);
+      alert("Failed to register. Please try again.");
+    }
+  };
   return (
     <KeyboardAvoidingView
       style={{ flex: 1 }}
@@ -155,7 +178,7 @@ const RegistrationScreen = () => {
             onPress={() => setShowDatePicker(true)}
           >
             <Text style={styles.dateText}>
-              {dob ? dob.toDateString() : "Select Date of Birth"}
+              {birthDate ? birthDate.toDateString() : "Select Date of Birth"}
             </Text>
           </TouchableOpacity>
 
@@ -170,7 +193,7 @@ const RegistrationScreen = () => {
                 <View style={styles.datePickerContainer}>
                   <Text style={styles.datePickerTitle}>Choose Your DOB</Text>
                   <DateTimePicker
-                    value={dob || new Date()}
+                    value={birthDate || new Date()}
                     mode="date"
                     display={Platform.OS === "ios" ? "spinner" : "default"}
                     onChange={handleDateChange}
@@ -203,16 +226,20 @@ const RegistrationScreen = () => {
             secureTextEntry
           />
 
-          <View style={styles.checkboxRow}>
-            <CheckBox
-              value={agree}
-              onValueChange={setAgree}
-              tintColors={{ true: "#f57c00", false: "gray" }}
-            />
+          <TouchableOpacity
+            onPress={() => setAgree((prev) => !prev)}
+            style={styles.checkboxRow}
+            activeOpacity={0.8}
+          >
+            <View
+              style={[styles.customCheckbox, agree && styles.checkedCheckbox]}
+            >
+              {agree && <Text style={styles.checkmark}>✓</Text>}
+            </View>
             <Text style={styles.checkboxText}>
               I agree to the Privacy Policy
             </Text>
-          </View>
+          </TouchableOpacity>
 
           <TouchableOpacity style={styles.registerBtn} onPress={handleRegister}>
             <Text style={styles.registerText}>Register</Text>
@@ -267,16 +294,6 @@ const styles = StyleSheet.create({
   dateText: {
     fontSize: 16,
     color: "#333",
-  },
-  checkboxRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginVertical: 15,
-  },
-  checkboxText: {
-    marginLeft: 10,
-    fontSize: 14,
-    color: "#555",
   },
   registerBtn: {
     backgroundColor: "#f57c00",
@@ -355,4 +372,33 @@ const styles = StyleSheet.create({
   },
   modalText: { fontSize: 16, color: "#000" },
   modalCancel: { marginTop: 15, color: "red" },
+  checkboxRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginVertical: 15,
+  },
+  customCheckbox: {
+    height: 20,
+    width: 20,
+    borderRadius: 4,
+    borderWidth: 1,
+    borderColor: "#999",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#fff",
+  },
+  checkedCheckbox: {
+    backgroundColor: "#f57c00",
+    borderColor: "#f57c00",
+  },
+  checkmark: {
+    color: "#fff",
+    fontWeight: "bold",
+    fontSize: 14,
+  },
+  checkboxText: {
+    marginLeft: 10,
+    fontSize: 14,
+    color: "#555",
+  },
 });

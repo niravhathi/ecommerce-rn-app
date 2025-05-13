@@ -39,13 +39,13 @@ const FlashSale = ({
   return (
     <View>
       <Text style={styles.heading}>🔥 Flash Sale</Text>
-      <FlatList
-        data={products.slice(0, 5)} // just show first 5
+      {/* <FlatList
+        data={products?.slice(0, 5) || []} // just show first 5
         renderItem={renderItem}
         keyExtractor={(item) => item.id.toString()}
         horizontal
         showsHorizontalScrollIndicator={false}
-      />
+      /> */}
     </View>
   );
 };

@@ -100,10 +100,10 @@ const ProductDetailsScreen = () => {
         {/* Category */}
         <View style={styles.categoryBox}>
           <Image
-            source={{ uri: product.category.image }}
+            // source={{ uri: product.category.image }}
             style={styles.categoryImage}
           />
-          <Text style={styles.categoryText}>{product.category.name}</Text>
+          <Text style={styles.categoryText}>{product.category}</Text>
         </View>
 
         {/* Add to Cart Button */}

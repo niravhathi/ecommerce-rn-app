@@ -21,44 +21,48 @@ import { saveUser } from "../utils/UserStorage";
 import { User } from "../model/User";
 
 const LoginScreen = ({ navigation }: any) => {
-  const [email, setEmail] = useState("john@mail.com");
-  const [password, setPassword] = useState("changeme");
+  const [username, setUsername] = useState("emilys");
+  const [password, setPassword] = useState("emilyspass");
   const [rememberMe, setRememberMe] = useState(false);
 
   const handleLogin = async () => {
-    if (!email || !password) {
-      Alert.alert("Validation Error", "Please enter email and password");
+    if (!username || !password) {
+      Alert.alert("Validation Error", "Please enter username and password");
       return;
     }
 
     try {
       const response = await ApiManager.post(`${APIConstant.AUTH_LOGIN}`, {
-        email,
+        username,
         password,
+        expiresInMins: 30,
       });
+      console.log("Login response:", response.accessToken);
+      if (response?.accessToken) {
+        // const { access_token, refresh_token } = response;
 
-      if (response?.access_token) {
-        const { access_token, refresh_token } = response;
-
-        const profileRes = await ApiManager.get(`${APIConstant.AUTH_PROFILE}`, {
-          headers: {
-            Authorization: `Bearer ${access_token}`,
-          },
-        });
+        // const profileRes = await ApiManager.get(`${APIConstant.AUTH_PROFILE}`, {
+        //   headers: {
+        //     Authorization: `Bearer ${access_token}`,
+        //   },
+        // });
 
         const user: User = {
-          id: profileRes.id,
-          name: profileRes.name,
-          email: profileRes.email,
-          role: profileRes.role,
-          avatar: profileRes.avatar,
-          accessToken: access_token,
-          refreshToken: refresh_token,
+          id: response.id,
+          firstName: response.firstName,
+          email: response.email,
+          role: response.role,
+          image: response.image,
+          accessToken: response.accessToken,
+          refreshToken: response.refreshToken,
+          lastName: response.lastName,
+          username: response.username,
+          gender: response.gender,
         };
 
         await saveUser(user);
 
-        Alert.alert("Login Success", `Welcome ${user.name}!`);
+        Alert.alert("Login Success", `Welcome ${user.firstName}!`);
         navigation.reset({
           index: 0,
           routes: [{ name: "MainTabs" }],
@@ -114,12 +118,12 @@ const LoginScreen = ({ navigation }: any) => {
 
           <TextInput
             style={styles.input}
-            placeholder="Email"
+            placeholder="Username or Email"
             placeholderTextColor="#999"
             keyboardType="email-address"
             autoCapitalize="none"
-            value={email}
-            onChangeText={setEmail}
+            value={username}
+            onChangeText={setUsername}
           />
 
           <TextInput
