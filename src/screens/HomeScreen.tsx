@@ -282,7 +282,8 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     padding: 10,
     marginVertical: 8,
-    width: "50%", // fit 2 columns with some spacing
+    marginHorizontal: 8,
+    width: "47%", // fit 2 columns with some spacing
   },
   productImage: {
     width: "100%",
